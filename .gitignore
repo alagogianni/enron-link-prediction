@@ -1,7 +1,7 @@
 # Raw dataset (download separately, see README)
 data/
 *.edg
-*.txt
+email-Enron.txt
 
 # Generated embeddings / intermediate artifacts (large binary files)
 *.npy
