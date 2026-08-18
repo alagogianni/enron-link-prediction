@@ -1,0 +1,4 @@
+Method,AUC,Precision,Recall,F1-Score
+Adamic-Adar Index,0.9546,0.9814,0.9112,0.9450
+Jaccard Coefficient,0.9488,0.9793,0.9121,0.9445
+Node2Vec + Logistic Regression,0.9273,0.8553,0.8403,0.8478
