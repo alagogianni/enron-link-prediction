@@ -1,6 +1,10 @@
-# Enron Email Network - Graph Analysis & Link Prediction
+# Enron Email Network — Graph Analysis & Link Prediction
 
 Network analysis and link prediction on the [Enron Email Network](https://snap.stanford.edu/data/email-Enron.html) (Stanford SNAP). The project explores the structure of corporate email communication and compares classical topological heuristics against a representation-learning approach (Node2Vec) for predicting hidden connections between employees.
+
+## Why this matters
+
+Link prediction — estimating whether a connection exists or will form between two entities — sits behind many systems people use daily: "People you may know" on LinkedIn and Facebook, product recommendations on Amazon, drug-interaction discovery in bioinformatics, and hidden-relationship detection in criminal network analysis. Applied to a corporate email network, the same technique becomes a **People Analytics** tool: it can surface undocumented collaborations, informal reporting lines, and information bottlenecks that org charts don't capture. This project uses the Enron email corpus — a real, large-scale corporate network — as a testbed for that idea.
 
 ## Overview
 
@@ -17,7 +21,7 @@ Network analysis and link prediction on the [Enron Email Network](https://snap.s
 | Jaccard Coefficient | 0.9488 | 0.9793 | 0.9121 | 0.9445 |
 | Node2Vec + Logistic Regression | 0.9273 | 0.8553 | 0.8403 | 0.8478 |
 
-The classical neighborhood-based heuristics (Adamic-Adar, Jaccard) outperform Node2Vec on this network. This is consistent with the graph's structure: a high clustering coefficient (0.50) indicates communication happens largely within tight-knit, closed groups - a regime where "shared neighbors" is an almost perfect predictive signal. Node2Vec's random-walk embeddings capture broader organizational structure and remain valuable for detecting latent relationships that don't share direct neighbors, but trade off some precision/recall on this particular dataset.
+The classical neighborhood-based heuristics (Adamic-Adar, Jaccard) outperform Node2Vec on this network. This is consistent with the graph's structure: a high clustering coefficient (0.50) indicates communication happens largely within tight-knit, closed groups — a regime where "shared neighbors" is an almost perfect predictive signal. Node2Vec's random-walk embeddings capture broader organizational structure and remain valuable for detecting latent relationships that don't share direct neighbors, but trade off some precision/recall on this particular dataset.
 
 Full write-up, methodology, and discussion of limitations are in [`report/`](report/).
 
@@ -32,11 +36,16 @@ Full write-up, methodology, and discussion of limitations are in [`report/`](rep
 
 ## Methodology
 
-1. **Exploratory Network Analysis** - connected components, clustering coefficient, triangle count, transitivity, degree centrality / betweenness / eigenvector / closeness centrality, degree distribution
-2. **Train/test split** - 10% of real edges held out as positive test samples; equal number of random non-edges sampled as negatives (balanced dataset)
-3. **Classical link prediction** - Jaccard Coefficient and Adamic-Adar Index computed directly on the training graph
-4. **Representation learning** - Node2Vec (via [PecanPy](https://github.com/krishnanlab/PecanPy) for efficient random walks) generates 128-dim node embeddings; edge features built via Hadamard product; classified with Logistic Regression. Grid search over walk strategies (p, q) — best strategy: High Exploration (p=0.1, q=0.1)
-5. **Evaluation** - AUC, Precision, Recall, F1, ROC curves, confusion matrices, train/test overfitting check, DeLong's test for statistical significance between strategies
+1. **Exploratory Network Analysis** — connected components, clustering coefficient, triangle count, transitivity, degree centrality / betweenness / eigenvector / closeness centrality, degree distribution
+2. **Train/test split** — 10% of real edges held out as positive test samples; equal number of random non-edges sampled as negatives (balanced dataset)
+3. **Classical link prediction** — Jaccard Coefficient and Adamic-Adar Index computed directly on the training graph
+4. **Representation learning** — Node2Vec (via [PecanPy](https://github.com/krishnanlab/PecanPy) for efficient random walks) generates 128-dim node embeddings; edge features built via Hadamard product; classified with Logistic Regression. Grid search over walk strategies (p, q) — best strategy: High Exploration (p=0.1, q=0.1)
+5. **Evaluation** — AUC, Precision, Recall, F1, ROC curves, confusion matrices, train/test overfitting check, DeLong's test for statistical significance between strategies
+
+### Why these algorithms
+
+- **Jaccard & Adamic-Adar** were chosen over other topological indices (e.g. Katz Index) because they operate on local neighborhoods only, scale to a 36K-node graph without issue, and fit the network's strongly local structure (clustering coefficient ≈ 0.50). Katz Index requires path enumeration across the whole graph (O(N³)), which is impractical at this scale.
+- **Node2Vec** was added specifically to test whether a representation-learning approach could capture relationships that don't share direct neighbors — e.g. two employees in different departments who play a similar organizational "bridge" role. It trades some precision for the ability to encode broader structural patterns beyond immediate connections.
 
 ## Repository structure
 
@@ -72,7 +81,7 @@ pip install -r requirements.txt
 jupyter notebook notebooks/graphs_final.ipynb
 ```
 
-> Note: the Node2Vec embedding generation step (**Step 8a** - grid search over random-walk strategies) takes ~78 minutes on a standard machine and must run once to produce the `.npy` embedding files consumed by the rest of the pipeline. These files are not committed to the repo (see `.gitignore`) since they're large, regenerable artifacts. On a first run, execute Step 8a before moving on to Step 8b; on any subsequent run, Step 8a can be skipped as long as the `.npy` files it produced are still present locally.
+> Note: the Node2Vec embedding generation step (**Step 8a** — grid search over random-walk strategies) takes ~78 minutes on a standard machine and must run once to produce the `.npy` embedding files consumed by the rest of the pipeline. These files are not committed to the repo (see `.gitignore`) since they're large, regenerable artifacts. On a first run, execute Step 8a before moving on to Step 8b; on any subsequent run, Step 8a can be skipped as long as the `.npy` files it produced are still present locally.
 
 ## Tools
 
@@ -80,9 +89,9 @@ Python · NetworkX · PecanPy · Gensim (Word2Vec) · scikit-learn · Matplotlib
 
 ## Author
 
-MSc project - Information Systems & Services, University of Piraeus, 2026.
+MSc coursework project — Information Systems & Services, University of Piraeus, 2026.
 
 ## References
 
 - Grover, A., & Leskovec, J. (2016). *node2vec: Scalable feature learning for networks.* KDD 2016.
-- Stanford Network Analysis Project - [Enron email network](https://snap.stanford.edu/data/email-Enron.html)
+- Stanford Network Analysis Project — [Enron email network](https://snap.stanford.edu/data/email-Enron.html)
